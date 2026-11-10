@@ -1,0 +1,26 @@
+{
+  "_lisez-moi": "Événements réels vérifiés (sources : FEMAFOOT et Maliexpress, 4 nov. 2026). Les PRIX et CAPACITÉS par tribune ne sont pas publics : le Ministère/la FEMAFOOT doivent les fournir. Tant que 'tribunes' est vide, l'événement s'affiche avec « Billetterie bientôt ouverte ». Les horaires sont marqués à confirmer (heureConfirmee=false) car les sources divergent (Maliexpress : 19 h ; FEMAFOOT : à confirmer). Fuseau : Mali = UTC+0 toute l'année.",
+  "evenements": [
+    {
+      "type": "Football",
+      "titre": "Mali – Rwanda",
+      "adv": "Éliminatoires CAN 2027 · Groupe K · J3",
+      "date": "2026-11-13T19:00",
+      "heureConfirmee": false,
+      "lieu": "Stade du 26 Mars, Bamako",
+      "tribunes": []
+    },
+    {
+      "type": "Football",
+      "titre": "Mali – Libéria",
+      "adv": "Éliminatoires CAN 2027 · Groupe K · J6",
+      "date": "2027-03-27T17:00",
+      "heureConfirmee": false,
+      "lieu": "Stade du 26 Mars, Bamako",
+      "tribunes": []
+    }
+  ],
+  "_exemple_tribunes": [
+    { "nom": "Pelouse populaire", "prix": 1000, "stock": 0 }
+  ]
+}

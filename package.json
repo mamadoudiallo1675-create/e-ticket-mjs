@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@netlify/database": "^2.0.3",
+    "cinetpay-js": "^0.1.1",
+    "dotenv": "^18.0.10",
+    "git": "^0.1.5",
+    "pg": "^8.23.1",
+    "twilio": "^6.3.0"
+  }
+}

@@ -1,0 +1,14 @@
+OK   un sport sans affiche existe pour le test — arts-martiaux
+OK   événement annoncé créé SANS tribune — {"id":6}
+OK   sans billetterie : l'événement est dans « Autres affiches » (avec son titre)
+OK   sans billetterie : il n'est PAS dans « Affiches à l'honneur »
+OK   sans billetterie : pas de puce de filtre pour ce sport
+OK   l'administrateur ouvre la billetterie (ajout d'une tribune) — 201
+OK   billetterie ouverte : l'affiche apparaît en direct dans « Affiches à l'honneur »
+OK   billetterie ouverte : elle a quitté « Autres affiches »
+OK   billetterie ouverte : bouton « Réserver » actif
+OK   billetterie ouverte : la puce de filtre du sport apparaît
+OK   chaque affiche ouverte est dans « à l'honneur », chaque autre sport dans « Autres »
+OK   aucune erreur JavaScript
+
+12 réussis, 0 échecs

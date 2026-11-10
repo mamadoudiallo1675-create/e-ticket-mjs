@@ -1,0 +1,24 @@
+OK   Orange, Moov et CinetPay sont proposés — cinetpay:true orange:true moov:true
+OK   Orange : commande créée avec une adresse de paiement — 201
+OK   Orange : jeton demandé en JSON avec client_id / client_secret / client_credentials
+OK   Orange : POST /webpayment avec Bearer et tous les champs du document — {"merchant_key":"mk-test","currency":"XOF","order_id":"CMD-JFHPRXB4","amount":2000,"return_url":"https://billetterie.exemple.ml/?order=CMD-JFHPRXB4","cancel_url":"https://billetterie.exemple.ml/?order=CMD-JFHPRXB4&cancel=1","notif_url":"https://billetterie.exemple.ml/api/webhooks/orange","lang":"fr","reference":"CMD-JFHPRXB4"}
+OK   Orange : return_url, cancel_url et notif_url sont celles du site
+OK   Orange : la notification répond 200 « OK »
+OK   Orange : une notification SUCCESS non confirmée par le statut ne valide pas la commande
+OK   Orange : statut vérifié auprès d'Orange (order_id, amount, pay_token) puis commande payée
+OK   Orange : un jeton de notification inconnu est ignoré sans erreur
+OK   Moov : commande créée SANS redirection (payUrl vide, push USSD) — 201 {"ref":"CMD-9A5FQBZS","token":"05a3be156e69392023dade7b489ab1e005b5c565df8e3582","payUrl":null,"expiresAt":1794255974106
+OK   Moov : requête SOAP/XML en POST (Content-Type text/xml)
+OK   Moov : merchantId, password, XOF, montant, numéro 223 + 8 chiffres
+OK   Moov : referenceId = référence de commande (unique) et callbackUrl HTTPS du site
+OK   Moov : après la réponse PENDING/01, la commande reste en attente du code PIN
+OK   Moov : callback JSON répond 200 « OK »
+OK   Moov : montant différent confirmé par Moov → commande NON validée
+OK   Moov : callback au format XML accepté ; getTransactionStatus interrogé puis commande payée
+OK   Moov : billets délivrés (2)
+OK   Moov : paiement refusé → commande échouée, places libérées
+OK   Moov : sans callback, l'interrogation de la commande (polling) retrouve le paiement
+OK   Moov : callback d'une adresse IP non autorisée refusé (403)
+OK   aucun secret (client_secret, mot de passe Moov) n'apparaît dans le navigateur
+
+22 réussis, 0 échecs

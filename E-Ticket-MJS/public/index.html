@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="et-pay-backend" content="server"><!-- « netlify » pour l'hébergement Netlify (fonctions initier_paiement / webhook_cinetpay) -->
+<meta name="description" content="Billetterie officielle du Ministère de la Jeunesse et des Sports du Mali : consultez les affiches, réservez vos billets et payez par Mobile Money.">
+<meta name="theme-color" content="#087a33">
+<meta property="og:type" content="website"><meta property="og:locale" content="fr_ML"><meta property="og:site_name" content="E-Ticket Mali">
+<meta property="og:title" content="E-Ticket Mali – Billetterie des événements sportifs"><meta property="og:description" content="Billetterie officielle du Ministère de la Jeunesse et des Sports du Mali : consultez les affiches, réservez vos billets et payez par Mobile Money."><meta property="og:image" content="img/sports/football/3.svg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest">
+<title>E-Ticket Mali – Billetterie des événements sportifs</title>
+<link rel="stylesheet" href="css/site.css">
+<script src="vendor/qr.js"></script>
+<script src="js/sport-images.js"></script>
+<script src="js/common.js"></script>
+<script>/* Filet de sécurité : si js/common.js n'a pas pu être chargé (chemin relatif cassé, aperçu isolé, fichier absent), on retente avec le chemin absolu, puis on affiche un message clair au lieu de « ET is not defined ». */
+window.ET||document.write('<script src="/js/common.js"><\/script>');
+if(!window.ET){var _m=function(){return""};window.ET={esc:_m,fmt:_m,fdate:_m,$:function(s){return document.querySelector(s)},api:function(){return Promise.reject(new Error("js/common.js introuvable"))},config:function(){return Promise.resolve({})},track:function(){},live:function(){},missing:true,carousel:{toggle:_m,off:_m,html:_m,init:_m,images:function(){return[]}},staff:{get:function(){return null},clear:function(){},set:function(){}},platform:"autre",mobile:true};
+document.addEventListener("DOMContentLoaded",function(){var d=document.createElement("div");d.setAttribute("role","alert");d.style.cssText="position:fixed;inset:0 0 auto 0;z-index:99999;background:#ce1126;color:#fff;padding:14px 16px;font:600 15px/1.4 system-ui,sans-serif;text-align:center";d.textContent="Le fichier js/common.js est introuvable : ouvrez le site par son adresse (serveur E-Ticket) ou conservez le dossier « js » à côté des pages.";document.body.appendChild(d)})}</script>
+<script src="js/cart.js"></script>
+<script src="js/cinetpay-checkout.js"></script>
+<style>
+main{max-width:1100px;margin:auto;padding:24px 16px 60px}
+.hero{background:linear-gradient(135deg,#075f28,#0a8f3c);color:#fff;border-radius:16px;padding:32px 28px;margin-bottom:28px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:var(--jaune);opacity:.25}
+.hero h1{font-size:clamp(1.5rem,4vw,2.2rem);max-width:640px}
+.hero p{margin-top:10px;max-width:620px;opacity:.92}
+h2{font-size:1.3rem;margin-bottom:14px}
+.filtres{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:1px solid var(--btn);background:#fff;color:var(--btn);padding:6px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:.9rem;font-weight:600;transition:background .15s}
+.chip:hover{background:var(--btn-teinte)}
+.chip.on{background:var(--btn);color:#fff;border-color:var(--btn)}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.card{background:var(--carte);border:1px solid var(--bord);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.affiche{aspect-ratio:4/5;color:#fff;padding:18px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
+.affiche .tag{align-self:flex-start;background:rgba(0,0,0,.35);padding:3px 10px;border-radius:999px;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase}
+.affiche .vs{font-size:1.7rem;font-weight:800;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+.affiche .vs span{display:block;font-size:.95rem;font-weight:600;opacity:.9;margin:4px 0}
+.affiche .lieu{font-size:.85rem;opacity:.95}
+.corps{padding:14px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.prix{font-weight:700}
+.corps .btn{margin-top:auto}
+.dispo{height:6px;background:#e9ebe4;border-radius:4px;overflow:hidden}
+.dispo i{display:block;height:100%;background:var(--jaune)}
+.tribunes{display:grid;gap:8px}
+.trib{display:flex;justify-content:space-between;align-items:center;border:1.5px solid var(--bord);border-radius:10px;padding:10px 12px;cursor:pointer}
+.trib.on{border-color:var(--vert);background:#eaf7ee}
+.trib.off{opacity:.45;cursor:not-allowed}
+.qte{display:flex;align-items:center;gap:12px}
+.qte button{width:38px;height:38px;border-radius:10px;border:1px solid var(--btn);background:#fff;color:var(--btn);font-size:1.2rem;font-weight:700;cursor:pointer}.qte button:hover{background:var(--btn-teinte)}
+.total{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:800;margin:18px 0 4px;padding-top:14px;border-top:1px dashed var(--bord)}
+.billet{background:#fff;border:1px solid var(--bord);border-radius:14px;display:grid;grid-template-columns:1fr 150px;overflow:hidden;margin-bottom:14px}
+.billet .info{padding:16px 18px}
+.billet .info h4{font-size:1.05rem}
+.billet .qr{background:#fafaf6;border-left:2px dashed var(--bord);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;gap:6px;font-size:.7rem;color:var(--gris);text-align:center;word-break:break-all}
+.badge{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:999px;background:#e3f5e9;color:#0a6b2d}
+th,td{padding:10px 12px;text-align:left;font-size:.9rem;border-bottom:1px solid var(--bord)}
+th{background:#f0f2ea}
+.vide{background:#fff;border:1px dashed var(--bord);border-radius:14px;padding:36px;text-align:center;color:var(--gris)}
+.aide{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.aide .bloc{background:#fff;border:1px solid var(--bord);border-radius:14px;padding:18px}
+details{border-bottom:1px solid var(--bord);padding:10px 0}summary{cursor:pointer;font-weight:600}
+@media(max-width:560px){.billet{grid-template-columns:1fr}.billet .qr{border-left:0;border-top:2px dashed var(--bord)}}
+</style>
+</head>
+<body class="fond">
+
+<main>
+<section id="p-accueil">
+  <div class="hero hero-img">
+    <h1>Réservez vos places pour les matchs des Aigles du Mali et les compétitions nationales</h1>
+    <p>Choisissez votre rencontre, votre tribune, payez par Mobile Money et recevez votre billet en QR code. Fini les files d'attente aux guichets.</p>
+    <div class="hero-sports" id="hero-sports"></div>
+  </div>
+  <h2 id="t-affiches">Affiches à l'honneur</h2>
+  <button class="chip car-pause" id="car-pause" type="button" aria-pressed="false">⏸ Mettre en pause le défilement des images</button>
+  <div class="filtres" id="filtres"></div>
+  <div class="grille" id="grille"></div>
+  <div id="autres"><h2 class="sports-titre">Autres affiches</h2>
+  <p class="sports-intro">Sports et événements dont la billetterie ouvrira prochainement : dès que les réservations sont ouvertes, l'affiche passe automatiquement dans « Affiches à l'honneur ».</p>
+  <div class="sports-grid" id="sports-grid"></div></div>
+</section>
+
+<section id="p-billets" class="hidden"><h2>Mes billets (M-Ticket)</h2><p class="meta" style="margin-bottom:14px">Présentez le QR code depuis votre téléphone aux bornes de contrôle du stade.</p><details id="recup" class="hidden" style="background:#fff;border:1px solid var(--bord);border-radius:14px;padding:14px 16px;margin-bottom:16px"><summary style="cursor:pointer;font-weight:700">Retrouver mes billets sur cet appareil (par SMS)</summary>
+  <div id="rec-1"><label for="rec-tel">Numéro de téléphone utilisé pour le paiement</label><input id="rec-tel" inputmode="tel" placeholder="8 chiffres"><div class="row"><button class="btn" id="rec-send">Recevoir un code par SMS</button></div></div>
+  <div id="rec-2" class="hidden"><label for="rec-code">Code reçu par SMS (6 chiffres)</label><input id="rec-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code"><div class="row"><button class="btn sec" id="rec-back">Retour</button><button class="btn" id="rec-verify">Valider</button></div></div>
+  <p class="note" id="rec-msg"></p></details>
+  <div id="liste-billets"></div></section>
+<section id="p-historique" class="hidden"><h2>Historique des transactions</h2><div id="liste-histo"></div></section>
+<section id="p-aide" class="hidden"><h2>Support / Aide</h2>
+  <div class="aide">
+    <div class="bloc"><h3 style="margin-bottom:8px">Contacter le service client</h3>
+      <label for="s-tel" style="margin-top:0">Votre numéro</label><input id="s-tel" placeholder="Ex. 70 00 00 00">
+      <label for="s-msg">Votre message</label><textarea id="s-msg" rows="4" style="width:100%;padding:10px;border:1px solid #cfd3c8;border-radius:10px;font:inherit" placeholder="Décrivez votre problème…"></textarea>
+      <div class="row"><button class="btn" id="s-send">Envoyer</button></div><p class="note" id="s-ok"></p>
+    </div>
+    <div class="bloc"><h3 style="margin-bottom:8px">Questions fréquentes</h3>
+      <details><summary>Comment retrouver mon billet ?</summary><p class="meta">Rendez-vous dans « Mes billets » ou « Historique » : vos billets restent disponibles même si vous fermez l'application.</p></details>
+      <details><summary>Quels moyens de paiement ?</summary><p class="meta">Le paiement s'effectue par Mobile Money (Orange Money, Moov Money…).</p></details>
+      <details><summary>Que présenter à l'entrée ?</summary><p class="meta">Le QR code de votre billet, sur votre téléphone, devant la borne de contrôle.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+
+
+<div class="modal" id="modal"><div class="dialog" id="dialog"></div></div>
+
+<script>
+const {fmt,fdate,esc,$,api}=ET;
+const STATUT={PENDING:"En attente de paiement",PAID:"Payé",FAILED:"Paiement échoué",EXPIRED:"Expiré",REFUND_DUE:"Remboursement en cours"};
+const GRADS={Football:"linear-gradient(160deg,#0a8f3c,#064d20 70%,#fcd116 160%)",Basketball:"linear-gradient(160deg,#e08600,#7a3b00 80%)","Athlétisme":"linear-gradient(160deg,#1769aa,#0b2f52 80%)",Culture:"linear-gradient(160deg,#7b2cbf,#3a0f66 80%)"};
+const grad=e=>e.grad||GRADS[e.type]||"linear-gradient(160deg,#ce1126,#6b0a16 75%)";
+let EVENTS=[],CONFIG={operators:[],demo:false,ttlMin:15},filtre="Tous",cur=null,CACHE={};
+const LS="eticket-commandes";
+const opName=id=>{const o=(CONFIG.operators||[]).find(x=>x.id===id);return o?(o.court||o.nom):id};
+const loadRefs=()=>{try{return JSON.parse(localStorage.getItem(LS)||"[]")}catch(e){return[]}};
+const saveRefs=a=>{try{localStorage.setItem(LS,JSON.stringify(a))}catch(e){}};
+
+
+function pages(p){
+  ["accueil","billets","historique","aide"].forEach(k=>$("#p-"+k).classList.toggle("hidden",k!==p));
+  if(p==="billets")renderBillets();if(p==="historique")renderHisto();window.scrollTo(0,0);ET.track(p==="billets"?"tickets.view":"page.view",p);
+}
+const TABS=["accueil","billets","historique","aide"];
+const fromHash=()=>{const h=location.hash.slice(1);return TABS.includes(h)?h:"accueil"};
+window.addEventListener("hashchange",()=>pages(fromHash()));
+
+const SPN=id=>((CONFIG.sports||[]).find(x=>x.id===id)||{}).nom||"";
+const sportOf=e=>e.sport||"autre";
+const isOpen=e=>(e.tribunes||[]).length>0;   // billetterie ouverte = au moins une tribune : l'événement est alors « à l'honneur », sinon il reste dans « Autres affiches »
+const OPEN=()=>EVENTS.filter(isOpen);
+function renderFiltres(){
+  const ids=[...new Set(OPEN().map(sportOf))];
+  const order=(CONFIG.sports||[]).map(x=>x.id);
+  ids.sort((a,b)=>(order.indexOf(a)<0?99:order.indexOf(a))-(order.indexOf(b)<0?99:order.indexOf(b)));
+  const n=id=>OPEN().filter(e=>sportOf(e)===id).length;
+  $("#filtres").innerHTML=`<button class="chip ${filtre==="Tous"?"on":""}" data-t="Tous">Tous les sports</button>`+ids.map(id=>`<button class="chip chip-sport ${id===filtre?"on":""}" data-t="${esc(id)}">${esc(SPN(id)||"Autres")} <small>${n(id)}</small></button>`).join("");
+}
+$("#filtres").onclick=e=>{const b=e.target.closest("button[data-t]");if(b){filtre=b.dataset.t;renderFiltres();renderEvents();ET.track("sport.filter",filtre)}};
+const fevt=e=>e.heure_confirmee===0?new Date(e.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+" · horaire à confirmer":fdate(e.date);
+function renderEvents(){
+  if(filtre!=="Tous"&&!OPEN().some(e=>sportOf(e)===filtre))filtre="Tous";   // le sport filtré n'a plus d'affiche ouverte
+  const list=OPEN().filter(e=>filtre==="Tous"||sportOf(e)===filtre);
+  if(!list.length){$("#grille").innerHTML=`<div class="vide" style="grid-column:1/-1">Aucune billetterie ouverte pour le moment. Les prochaines affiches sont dans « Autres affiches » ci-dessous : elles passeront ici dès l'ouverture des réservations.</div>`;stopCar();return}
+  $("#grille").innerHTML=list.map(e=>{
+    const open=e.tribunes.length>0,tot=e.tribunes.reduce((a,t)=>a+t.stock,0),min=open?Math.min(...e.tribunes.map(t=>t.prix)):0;
+    const info=!open?`<div class="prix">Billetterie bientôt ouverte</div><div class="meta">Les tarifs seront annoncés prochainement.</div>`
+      :`<div class="prix">À partir de ${fmt(min)}</div><div class="dispo"><i style="width:${Math.min(100,tot/30)}%"></i></div><div class="meta">${tot?tot+" places disponibles":"Complet"}</div>`;
+    return `<article class="card">
+      <div class="affiche${ET.carousel.images(e.sport).length?" has-car":""}" style="background:${grad(e)}">${ET.carousel.html(e.sport,SPN(e.sport)||e.type)}<span class="tag">${esc(SPN(e.sport)||e.type)}</span>
+        <div class="vs">${esc(e.titre)}<span>${esc(e.adv)}</span></div>
+        <div class="lieu">${new Date(e.date).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"})}<br>${esc(e.lieu)}</div></div>
+      <div class="corps"><div class="meta">${fevt(e)}</div>${info}
+        <button class="btn" ${open&&tot?"":"disabled"} data-id="${e.id}">${!open?"Bientôt disponible":tot?"Réserver":"Complet"}</button></div></article>`}).join("");
+  stopCar();stopCar=ET.carousel.init($("#grille"));
+}
+let stopCar=()=>{},stopCar2=()=>{};
+const FAM={moderne:"Sport moderne",traditionnel:"Sport traditionnel",autre:"Activité"};
+function renderSportsGrid(){
+  const sp=CONFIG.sports||[];if(!sp.length)return;
+  $("#hero-sports").innerHTML=sp.slice(0,6).map(x=>`<span>${esc(x.nom)}</span>`).join("")+(sp.length>6?`<span>+${sp.length-6}</span>`:"");
+  const autres=sp.filter(x=>!OPEN().some(e=>sportOf(e)===x.id));
+  $("#autres").classList.toggle("hidden",!autres.length);
+  const bp=$("#car-pause");const lab=()=>{const o=ET.carousel.off();bp.setAttribute("aria-pressed",o);bp.textContent=o?"▶ Reprendre le défilement des images":"⏸ Mettre en pause le défilement des images"};bp.onclick=()=>{ET.carousel.toggle();lab()};lab();
+  $("#sports-grid").innerHTML=autres.map(x=>{
+    const ann=EVENTS.filter(e=>sportOf(e)===x.id&&!isOpen(e));   // événements annoncés, billetterie pas encore ouverte
+    const det=ann.length?ann.map(e=>`<div class="sc-ann"><b>${esc(e.titre)}</b> ${esc(e.adv||"")}<br><span class="meta">${esc(fevt(e))} · ${esc(e.lieu||"")}</span></div>`).join(""):`<div class="sc-det">${esc(x.detail||"")}</div>`;
+    return `<article class="sport-card" data-sport="${esc(x.id)}">${ET.carousel.html(x.id,x.nom)}<span class="sc-n">Bientôt</span><div class="sc-txt"><div class="sc-fam">${esc(FAM[x.famille]||"")}</div><div class="sc-nom">${esc(x.nom)}</div>${det}<div class="prix">Billetterie bientôt ouverte</div><button class="btn" disabled>Bientôt disponible</button></div></article>`}).join("");
+  stopCar2();stopCar2=ET.carousel.init($("#sports-grid"),4500);
+}
+$("#grille").onclick=e=>{const b=e.target.closest("button[data-id]");if(b)openAchat(+b.dataset.id)};
+
+// ---- Achat ----
+function openAchat(id){
+  const ev=EVENTS.find(e=>e.id===id);
+  const op=(CONFIG.operators.find(o=>o.enabled)||{}).id||"orange";
+  cur={ev,t:Math.max(0,ev.tribunes.findIndex(t=>t.stock>0)),q:1,op,tel:"",busy:false,err:""};
+  drawAchat();$("#modal").classList.add("open");ET.track("event.view",ev.titre);
+}
+function drawAchat(){
+  const {ev,t,q}=cur,tr=ev.tribunes[t],tot=tr.prix*q;
+  $("#dialog").innerHTML=`<h3>${esc(ev.titre)}</h3><p class="meta">${fdate(ev.date)} · ${esc(ev.lieu)}</p>
+   <label>1. Choisissez votre tribune</label><div class="tribunes">${ev.tribunes.map((x,i)=>`<div class="trib ${i===t?"on":""} ${x.stock?"":"off"}" data-i="${i}"><span>${esc(x.nom)}<br><small class="meta">${x.stock?x.stock+" places":"Complet"}</small></span><b>${fmt(x.prix)}</b></div>`).join("")}</div>
+   <label>2. Nombre de places</label><div class="qte"><button data-d="-1">−</button><b id="q">${q}</b><button data-d="1">+</button><span class="meta">(max. 6)</span></div>
+   <label>3. Paiement Mobile Money</label>
+   <select id="op">${CONFIG.operators.map(o=>`<option value="${o.id}" ${o.enabled?"":"disabled"}>${esc(o.nom)}${o.enabled?"":" (bientôt disponible)"}</option>`).join("")}</select>
+   <input id="tel" style="margin-top:8px" inputmode="tel" placeholder="Numéro de téléphone (8 chiffres)" value="${esc(cur.tel)}">
+   <div class="total"><span>Total</span><span>${fmt(tot)}</span></div>
+   ${CONFIG.demo?`<p class="note">Mode démonstration : aucune somme n'est débitée.</p>`:`<p class="note">${cur.op==="moov"?"Une demande de paiement (code PIN) sera envoyée sur votre téléphone Moov : validez-la pour confirmer.":"Vous serez redirigé vers la page de paiement sécurisée de votre opérateur."} Les places sont réservées ${CONFIG.ttlMin} minutes.</p>`}
+   <p class="note" id="err" style="color:var(--rouge)">${esc(cur.err)}</p>
+   <div class="row"><button class="btn sec" id="x">Annuler</button><button class="btn" id="pay" ${cur.busy?"disabled":""}>${cur.busy?"Veuillez patienter…":"Payer "+fmt(tot)}</button></div>`;
+  $("#op").value=cur.op;$("#op").onchange=()=>{keep();drawAchat()};
+}
+function keep(){cur.tel=$("#tel").value;cur.op=$("#op").value}
+$("#dialog").onclick=async e=>{
+  const tb=e.target.closest(".trib");
+  if(tb&&cur&&cur.ev){const i=+tb.dataset.i;if(cur.ev.tribunes[i].stock){keep();cur.t=i;drawAchat()}return}
+  const d=e.target.dataset.d;
+  if(d&&cur){keep();cur.q=Math.min(6,Math.max(1,cur.q+ +d));drawAchat();return}
+  if(e.target.id==="x")closeM();
+  if(e.target.id==="pay"&&!cur.busy){
+    keep();cur.err="";
+    if(cur.tel.replace(/\D/g,"").length<8){cur.err="Entrez un numéro de téléphone valide (8 chiffres).";drawAchat();return}
+    cur.busy=true;drawAchat();
+    const popup=cur.op==="cinetpay"&&ET.cinetpay?ET.cinetpay.prepare():null;      // à ouvrir tout de suite (anti-blocage)
+    try{
+      const cart={eventId:cur.ev.id,tribuneId:cur.ev.tribunes[cur.t].id,qty:cur.q};
+      const r=await ET.cart.checkout(cart,cur.tel,cur.op,cur.ev.tribunes[cur.t].prix*cur.q);
+      if(r.netlify){location.href=r.payUrl;return}      // Netlify : page de retour /commande/<réf> (vérification puis billet + SMS)
+      const refs=loadRefs();refs.unshift({ref:r.ref,token:r.token});saveRefs(refs);
+      const o=ET.cinetpay.open(popup,r.payUrl,{ref:r.ref,onReturn:ref=>{pages("billets");watchOrder(ref)},onClose:ref=>watchOrder(ref)});
+      if(o.popup){closeM();history.replaceState(null,"","#billets");pages("billets");watchOrder(r.ref)}
+      else if(r.payUrl)location.href=r.payUrl;
+      else{closeM();history.replaceState(null,"","#billets");pages("billets");watchOrder(r.ref)}   // Moov : demande envoyée sur le téléphone (code PIN), pas de redirection
+    }catch(err){if(popup)try{popup.close()}catch(e){}cur.busy=false;cur.err=err.message;drawAchat();if(err.status===409)loadEvents()}
+  }
+};
+function closeM(){$("#modal").classList.remove("open");cur=null;stopPoll()}
+$("#modal").onclick=e=>{if(e.target.id==="modal")closeM()};
+
+// ---- Suivi d'une commande (retour de la page de paiement) ----
+let pollTimer=null;const stopPoll=()=>{clearTimeout(pollTimer);pollTimer=null};
+async function fetchOrder(r){const o=await api(`/api/orders/${r.ref}?token=${encodeURIComponent(r.token)}`);CACHE[r.ref]=o;return o}
+function watchOrder(ref){
+  const r=loadRefs().find(x=>x.ref===ref);
+  $("#modal").classList.add("open");
+  if(!r){$("#dialog").innerHTML=`<h3>Commande introuvable</h3><p class="meta" style="margin:8px 0">Cette commande n'a pas été passée depuis cet appareil. Utilisez le même navigateur que pour la réservation.</p><div class="row"><button class="btn" id="x">Fermer</button></div>`;return}
+  const tick=async()=>{
+    let o;
+    try{o=await fetchOrder(r)}catch(e){$("#dialog").innerHTML=`<h3>Vérification du paiement…</h3><p class="meta" style="margin-top:8px">${esc(e.message)} Nouvelle tentative…</p>`;pollTimer=setTimeout(tick,5000);return}
+    if(o.status==="PENDING"){
+      $("#dialog").innerHTML=`<h3>Vérification du paiement…</h3><p class="meta" style="margin-top:8px">Commande ${esc(o.ref)} · ${fmt(o.total)}<br>Validez la demande sur votre téléphone si ce n'est pas déjà fait. Cette page se met à jour automatiquement.</p><div class="row"><button class="btn sec" id="x">Fermer</button></div>`;
+      pollTimer=setTimeout(tick,3000);return;
+    }
+    history.replaceState(null,"",location.pathname);
+    if(o.status==="PAID"){
+      $("#dialog").innerHTML=`<h3>✅ Paiement confirmé</h3><p class="meta" style="margin:8px 0 14px">Commande ${esc(o.ref)} · ${o.qty} billet(s) · ${fmt(o.total)}</p><div class="row"><button class="btn sec" id="x">Fermer</button><button class="btn" id="go">Voir mes billets</button></div>`;
+      $("#go").onclick=()=>{closeM();pages("billets")};loadEvents();
+    }else{
+      const msg=o.status==="REFUND_DUE"?"Votre paiement a été reçu après l'expiration de la réservation et les places ne sont plus disponibles. Il sera remboursé : contactez le support avec la référence "+o.ref+".":o.status==="EXPIRED"?"La réservation a expiré. Aucune somme n'a été prélevée.":"Le paiement n'a pas abouti. Aucune somme n'a été prélevée.";
+      $("#dialog").innerHTML=`<h3>${esc(STATUT[o.status])}</h3><p class="meta" style="margin:8px 0 14px">${esc(msg)}</p><div class="row"><button class="btn" id="x">Fermer</button></div>`;loadEvents();
+    }
+  };
+  tick();
+}
+
+// ---- Billets & historique ----
+const getSession=()=>{try{const x=JSON.parse(localStorage.getItem("eticket-session")||"null");return x&&x.exp>Date.now()?x.token:null}catch(e){return null}};
+const setSession=(token,exp)=>{try{localStorage.setItem("eticket-session",JSON.stringify({token,exp}))}catch(e){}};
+const clearSession=()=>{try{localStorage.removeItem("eticket-session")}catch(e){}};
+async function refreshAll(){
+  const refs=loadRefs();
+  const res=await Promise.allSettled(refs.map(fetchOrder));
+  const keepRefs=refs.filter((r,i)=>!(res[i].status==="rejected"&&res[i].reason&&res[i].reason.status===404));
+  if(keepRefs.length!==refs.length)saveRefs(keepRefs);
+  const map={};keepRefs.forEach(r=>{if(CACHE[r.ref])map[r.ref]=CACHE[r.ref]});
+  const s=getSession();
+  if(s){try{(await api("/api/my/orders",{headers:{Authorization:"Bearer "+s}})).forEach(o=>{map[o.ref]=o;CACHE[o.ref]=o})}catch(e){if(e.status===401)clearSession()}}
+  return Object.values(map).sort((a,b)=>b.createdAt-a.createdAt);
+}
+async function renderBillets(){
+  const L=$("#liste-billets");L.innerHTML=`<p class="meta">Chargement…</p>`;
+  const orders=await refreshAll();
+  const paid=orders.filter(o=>o.status==="PAID"),pend=orders.filter(o=>o.status==="PENDING");
+  if(!paid.length&&!pend.length){L.innerHTML=`<div class="vide">Vous n'avez pas encore de billet.<br><br><button class="btn" onclick="pages('accueil')">Voir les événements</button></div>`;return}
+  let html=pend.map(o=>`<div class="vide" style="margin-bottom:14px;text-align:left">Paiement en attente — ${esc(o.event.titre)} (${fmt(o.total)}) ${loadRefs().some(r=>r.ref===o.ref)?`<button class="btn sec" style="margin-left:8px" data-w="${o.ref}">Vérifier</button>`:""}</div>`).join("");
+  const tks=[];
+  html+=paid.flatMap(o=>o.tickets.map(t=>{const i=tks.length;tks.push(t.code);return `<div class="billet"><div class="info"><span class="badge" ${t.status==="USED"?'style="background:#eee;color:#555"':""}>${t.status==="USED"?"Déjà utilisé":"Actif"}</span><h4 style="margin-top:6px">${esc(o.event.titre)}</h4>
+    <p class="meta">${esc(o.event.adv)}</p><p class="meta">${o.event.heureConfirmee===false?new Date(o.event.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+" · horaire à confirmer":fdate(o.event.date)}</p><p class="meta">${esc(o.event.lieu)}</p><p style="margin-top:6px"><b>${esc(o.tribune)}</b></p></div>
+    <div class="qr"><div id="qr${i}"></div>${esc(t.code)}</div></div>`})).join("");
+  L.innerHTML=html;
+  tks.forEach((c,i)=>{try{document.getElementById("qr"+i).innerHTML=QR.svg(c,{size:118})}catch(e){document.getElementById("qr"+i).textContent="[QR indisponible]"}});
+}
+$("#rec-send").onclick=async()=>{
+  const tel=$("#rec-tel").value;$("#rec-msg").textContent="";
+  try{const r=await api("/api/recover/request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:tel})});
+    $("#rec-msg").textContent=r.message;$("#rec-1").classList.add("hidden");$("#rec-2").classList.remove("hidden");$("#rec-code").focus()}
+  catch(e){$("#rec-msg").textContent=e.message}
+};
+$("#rec-back").onclick=()=>{$("#rec-2").classList.add("hidden");$("#rec-1").classList.remove("hidden");$("#rec-msg").textContent=""};
+$("#rec-verify").onclick=async()=>{
+  try{const r=await api("/api/recover/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:$("#rec-tel").value,code:$("#rec-code").value})});
+    setSession(r.session,r.expiresAt);$("#rec-code").value="";$("#rec-2").classList.add("hidden");$("#rec-1").classList.remove("hidden");
+    $("#rec-msg").textContent="";$("#recup").open=false;renderBillets()}
+  catch(e){$("#rec-msg").textContent=e.message}
+};
+$("#liste-billets").onclick=e=>{const b=e.target.closest("button[data-w]");if(b)watchOrder(b.dataset.w)};
+async function renderHisto(){
+  const L=$("#liste-histo");L.innerHTML=`<p class="meta">Chargement…</p>`;
+  const orders=await refreshAll();
+  if(!orders.length){L.innerHTML=`<div class="vide">Aucune transaction pour le moment.</div>`;return}
+  L.innerHTML=`<div style="overflow-x:auto"><table><tr><th>Date</th><th>Référence</th><th>Événement</th><th>Places</th><th>Montant</th><th>Paiement</th><th>Statut</th></tr>${orders.map(o=>`<tr><td>${new Date(o.createdAt).toLocaleString("fr-FR")}</td><td>${esc(o.ref)}</td><td>${esc(o.event.titre)}<br><small class="meta">${esc(o.tribune)}</small></td><td>${o.qty}</td><td>${fmt(o.total)}</td><td>${esc(opName(o.operator))}<br><small class="meta">${esc(o.phone)}</small></td><td>${esc(STATUT[o.status]||o.status)}</td></tr>`).join("")}</table></div>`;
+}
+$("#s-send").onclick=async()=>{
+  const msg=$("#s-msg").value.trim();
+  if(!msg){$("#s-ok").textContent="Veuillez écrire un message.";return}
+  try{await api("/api/support",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:$("#s-tel").value,message:msg})});
+    $("#s-ok").textContent="Message envoyé. Le service client vous répondra prochainement.";$("#s-msg").value=""}
+  catch(e){$("#s-ok").textContent=e.message}
+};
+
+async function loadEvents(){
+  try{EVENTS=await api("/api/events");renderFiltres();renderEvents();renderSportsGrid()}
+  catch(e){$("#grille").innerHTML=`<div class="vide" style="grid-column:1/-1">${esc(e.message)}</div>`}
+}
+ET.live(m=>{if(m.type==="hello"||m.type==="events")loadEvents()});
+document.addEventListener("eticket-server-ok",async()=>{if(!EVENTS.length){CONFIG=await ET.config();$("#recup").classList.toggle("hidden",!CONFIG.recovery);loadEvents()}});
+(async()=>{
+  if(ET.cinetpay&&ET.cinetpay.handleReturn())return;
+  CONFIG=await ET.config();
+  $("#recup").classList.toggle("hidden",!CONFIG.recovery);
+  await loadEvents();
+  const ref=new URLSearchParams(location.search).get("order");
+  if(ref&&/^CMD-[A-Z0-9]{8}$/.test(ref)){history.replaceState(null,"",location.pathname+"#billets");pages("billets");watchOrder(ref)}
+  else pages(fromHash());
+})();
+</script>
+</body>
+</html>

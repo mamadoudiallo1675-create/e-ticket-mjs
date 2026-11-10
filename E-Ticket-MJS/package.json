@@ -1,0 +1,35 @@
+{
+  "name": "eticket-mjs-mali",
+  "version": "1.0.0",
+  "description": "Serveur E-Ticket – Ministère de la Jeunesse et des Sports du Mali (le serveur Node n'a aucune dépendance ; les paquets listés ne servent qu'aux fonctions Netlify)",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "test": "node --disable-warning=ExperimentalWarning test.js",
+    "import": "node --disable-warning=ExperimentalWarning deploy/import-events.js",
+    "backup": "node --disable-warning=ExperimentalWarning deploy/backup.js",
+    "test:pages": "node --disable-warning=ExperimentalWarning tests/test-pages-interactives.js",
+    "test:fichiers": "node --disable-warning=ExperimentalWarning tests/test-fichiers-ouverts-directement.js",
+    "test:sports": "node --disable-warning=ExperimentalWarning tests/test-sports-temps-reel.js",
+    "test:bases": "node --disable-warning=ExperimentalWarning tests/test-bases-de-donnees.js",
+    "test:reseau": "node --disable-warning=ExperimentalWarning tests/test-connexion-reseau.js",
+    "doctor": "node deploy/doctor.js",
+    "presentation": "python3 live_server.py",
+    "test:images": "node --disable-warning=ExperimentalWarning tests/test-images-carrousels.js",
+    "test:appareils": "node --disable-warning=ExperimentalWarning tests/test-appareils-profils.js",
+    "test:affiches": "node --disable-warning=ExperimentalWarning tests/test-affiches-liens.js",
+    "test:flux": "node --disable-warning=ExperimentalWarning tests/test-flux-orange-moov.js",
+    "test:publication": "node --disable-warning=ExperimentalWarning tests/test-publication.js",
+    "test:netlify": "node --disable-warning=ExperimentalWarning tests/test-netlify-paiement.mjs"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@netlify/database": "^1.0.0",
+    "@netlify/functions": "^4.0.0",
+    "mongodb": "^6.10.0"
+  }
+}

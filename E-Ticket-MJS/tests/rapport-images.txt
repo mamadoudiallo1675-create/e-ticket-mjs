@@ -1,0 +1,21 @@
+Images, carrousels, fond — 2026-11-09T20:11:50.673Z
+OK    1. 13 sports, chacun avec au moins 3 images locales — 3,3,3,3,3,3,3,3,3,3,3,3,3
+OK    1. toutes les images existent sur le disque
+OK    1. fonds présents
+OK    1. /api/config fournit les images de chaque sport
+OK    1. image servie avec le bon type
+OK    2. chaque affiche contient un carrousel
+OK    2. le carrousel défile automatiquement — 0 → 1
+OK    2. images réellement chargées (non cassées)
+OK    2. « Autres affiches » : uniquement les sports sans affiche — arts-martiaux,cyclisme,natation,courses-chevaux,lutte,sokone,jeux-traditionnels,tir-arc,sports-nautiques
+OK    2. section renommée « Autres affiches »
+OK    2. chaque carte a un carrousel, la mention Bientôt et un bouton de réservation
+OK    2. pause du défilement au survol
+OK    2. image d'arrière-plan du site appliquée
+OK    2. bandeau d'accueil avec image
+OK    3. téléphone : pas de défilement horizontal
+OK    4. une image déposée dans le dossier apparaît sans modifier le code
+OK    5. démo : carrousels et 13 sports
+OK    5. démo : images chargées
+OK    6. page admin sans fond décoratif
+OK    aucune erreur JavaScript / image

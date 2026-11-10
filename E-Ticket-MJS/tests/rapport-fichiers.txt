@@ -1,0 +1,12 @@
+Pages ouvertes directement depuis les fichiers — 2026-11-09T20:11 UTC
+OK    index.html ouvert directement : design appliqué (fond rgb(245, 246, 242)) et menu (8 liens)
+OK    index : affiches chargées depuis le serveur local
+OK    index : fenêtre de réservation (montant calculé)
+OK    conditions.html ouvert directement : design appliqué (fond rgb(245, 246, 242)) et menu (8 liens)
+OK    conditions : bandeau « Projet non validé » (appel API depuis file://)
+OK    confidentialite.html ouvert directement : design appliqué (fond rgb(245, 246, 242)) et menu (8 liens)
+OK    admin.html ouvert directement : design appliqué (fond rgb(245, 246, 242)) et menu (8 liens)
+OK    admin : connexion et liste des événements
+OK    controle.html ouvert directement : design appliqué (fond rgb(245, 246, 242)) et menu (8 liens)
+OK    contrôle : connexion avec la clé de borne
+OK    aucune erreur JavaScript

@@ -1,0 +1,20 @@
+Machine : 2 cœur(s) Intel(R) Xeon(R) Processor @ 2.10GHz · 7.8 Go · Node v22.23.4
+Scénario : 1800 acheteurs, 150 connexions simultanées, 600 places en vente.
+
+1. Consultation des affiches (3 000 requêtes)      p50 43 ms · p95 95 ms · p99 122 ms · max 136 ms  — erreurs : 0
+2. Ruée : commandes avec réservation de places       p50 92 ms · p95 249 ms · p99 323 ms · max 465 ms
+   acceptées 400 (600 places) · refusées « complet » 1400 · autres erreurs 0
+3. Confirmation du paiement (400 commandes)            p50 206 ms · p95 222 ms · p99 371 ms · max 427 ms  — échecs : 0
+4. Suivi de commande par le navigateur (2 000)       p50 32 ms · p95 61 ms · p99 74 ms · max 165 ms  — erreurs : 0
+5. Contrôle aux bornes : 200 billets scannés 5 fois en parallèle   p50 59 ms · p95 139 ms · p99 156 ms · max 159 ms
+   acceptés 200 · refusés « déjà utilisé » 800
+
+OK   Aucune survente : places vendues ≤ places en vente
+OK   Stock final = places en vente − places payées
+OK   Un billet par place payée
+OK   Aucune commande restée en attente
+OK   Aucune erreur inattendue à la commande
+OK   Aucun échec de confirmation
+OK   Chaque billet accepté une seule fois (5 scans simultanés)
+
+(mémoire du générateur de charge : 178 Mo)

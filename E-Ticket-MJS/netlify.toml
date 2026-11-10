@@ -1,0 +1,12 @@
+# E-Ticket MJS Mali — Netlify. Le site est statique (public/) ; les fonctions gèrent paiement CinetPay, billets et SMS.
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Les en-têtes ci-dessous ne s'appliquent qu'aux pages statiques ; les fonctions fixent les leurs dans le code.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"

@@ -1,0 +1,10 @@
+node_modules
+data/*.sqlite*
+donnees
+tests
+certificats
+cles-acces.*
+.env
+*.zip
+live_server.py
+outils

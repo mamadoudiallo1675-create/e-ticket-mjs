@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Contrôle des billets</title>
+<link rel="stylesheet" href="css/site.css">
+<script src="js/common.js"></script>
+<script>/* Filet de sécurité : si js/common.js n'a pas pu être chargé (chemin relatif cassé, aperçu isolé, fichier absent), on retente avec le chemin absolu, puis on affiche un message clair au lieu de « ET is not defined ». */
+window.ET||document.write('<script src="/js/common.js"><\/script>');
+if(!window.ET){var _m=function(){return""};window.ET={esc:_m,fmt:_m,fdate:_m,$:function(s){return document.querySelector(s)},api:function(){return Promise.reject(new Error("js/common.js introuvable"))},config:function(){return Promise.resolve({})},track:function(){},live:function(){},missing:true,carousel:{toggle:_m,off:_m,html:_m,init:_m,images:function(){return[]}},staff:{get:function(){return null},clear:function(){},set:function(){}},platform:"autre",mobile:true};
+document.addEventListener("DOMContentLoaded",function(){var d=document.createElement("div");d.setAttribute("role","alert");d.style.cssText="position:fixed;inset:0 0 auto 0;z-index:99999;background:#ce1126;color:#fff;padding:14px 16px;font:600 15px/1.4 system-ui,sans-serif;text-align:center";d.textContent="Le fichier js/common.js est introuvable : ouvrez le site par son adresse (serveur E-Ticket) ou conservez le dossier « js » à côté des pages.";document.body.appendChild(d)})}</script>
+<style>
+.wrap{max-width:560px;margin:auto;padding:16px}
+h1{font-size:1.2rem;margin-bottom:4px}.sub{color:var(--gris);font-size:.88rem;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--bord);border-radius:14px;padding:16px;margin-bottom:14px}
+label{display:block;font-weight:600;font-size:.88rem;margin:12px 0 6px}label:first-child{margin-top:0}
+input,select{width:100%;padding:12px;border:1px solid #cfd3c8;border-radius:10px;font:inherit;background:#fff}
+button{font:inherit;font-weight:700;border:1px solid var(--btn);border-radius:10px;padding:13px 18px;cursor:pointer;background:var(--btn);color:#fff;width:100%;transition:background .15s,border-color .15s}
+button:hover{background:var(--btn-h);border-color:var(--btn-h)}
+button:active{background:var(--btn-a)}
+button:focus-visible{outline:3px solid rgba(8,122,51,.35);outline-offset:2px}
+button:disabled{background:#e4e7e0;color:#8a919c;border-color:#e4e7e0;cursor:not-allowed}
+button.sec{background:#fff;color:var(--btn);border:1px solid var(--btn)}
+button.sec:hover{background:var(--btn-teinte);color:var(--btn-h)}
+.seg{display:flex;gap:8px}.seg button{background:#fff;color:var(--btn);border:1px solid var(--btn)}.seg button:hover{background:var(--btn-teinte)}.seg button.on{background:var(--btn);color:#fff}
+video{width:100%;border-radius:12px;background:#000;aspect-ratio:1/1;object-fit:cover}
+.bar{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;color:var(--gris);margin-bottom:10px}
+.cnt{font-weight:800;color:var(--noir);font-size:1.1rem}
+.err{color:var(--rouge);font-size:.88rem;margin-top:8px;min-height:1.2em}
+#res{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:24px;z-index:10}
+#res.show{display:flex}#res .big{font-size:2.6rem;font-weight:900;line-height:1.1}#res .det{margin-top:12px;font-size:1.1rem;opacity:.95}#res small{margin-top:26px;opacity:.8}
+.dg{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--bord);font-size:.9rem}.dg:first-child{border-top:0}
+.dg b{flex:0 0 1.4em;text-align:center}.dg.d-ok b{color:var(--vert)}.dg.d-ko b{color:var(--rouge)}.dg.d-warn b{color:var(--orange)}.dg small{display:block;color:var(--gris)}
+.ok{background:var(--vert)}.ko{background:var(--rouge)}.warn{background:var(--orange)}
+</style>
+</head>
+<body data-no-footer>
+<div class="wrap">
+  <h1>Contrôle des billets</h1>
+  <p class="sub">Ministère de la Jeunesse et des Sports · E-Ticket</p>
+
+  <section id="s-login" class="card">
+    <label>Clé de contrôle</label>
+    <input id="key" type="password" autocomplete="off" placeholder="Fournie par l'administrateur">
+    <div class="err" id="e-login"></div>
+    <button id="b-login" style="margin-top:8px">Continuer</button>
+  </section>
+
+  <section id="s-setup" class="card hidden">
+    <label>Événement à contrôler</label>
+    <select id="ev"></select>
+    <label>Mode</label>
+    <div class="seg"><button id="m-consume" class="on">Valider l'entrée</button><button id="m-check">Vérifier seulement</button></div>
+    <p class="sub" style="margin:8px 0 0" id="m-help">Chaque billet accepté est marqué « utilisé » : un second passage sera refusé.</p>
+    <div class="err" id="e-setup"></div>
+    <button id="b-start" style="margin-top:12px">Démarrer le contrôle</button>
+    <hr style="border:0;border-top:1px solid var(--bord);margin:18px 0 12px">
+    <label style="margin-top:0">Avant le match : tester ce téléphone</label>
+    <p class="sub" style="margin:0 0 8px">Vérifie la connexion, la caméra et le lecteur de QR code, dans les conditions du stade.</p>
+    <button class="sec" id="b-diag">Lancer le test du poste</button>
+    <div id="diag" style="margin-top:10px"></div>
+  </section>
+
+  <section id="s-scan" class="hidden">
+    <div class="bar"><span id="evname"></span><span>Validés : <span class="cnt" id="cnt">0</span></span></div>
+    <video id="video" playsinline muted></video>
+    <div class="err" id="e-cam"></div>
+    <div class="card" style="margin-top:12px">
+      <label>Saisie manuelle du code</label>
+      <input id="manual" placeholder="ML-XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off">
+      <button id="b-manual" style="margin-top:8px">Contrôler ce code</button>
+    </div>
+    <button class="sec" id="b-stop">Changer d'événement / quitter</button>
+  </section>
+</div>
+
+<div id="res" onclick="hideRes()"><div class="big" id="r-big"></div><div class="det" id="r-det"></div><small>Touchez l'écran pour continuer</small></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const {esc}=ET;
+let KEY="";try{KEY=sessionStorage.getItem("ck")||""}catch(e){}
+let EV=null,EVNAME="",MODE="consume",stream=null,detector=null,scanning=false,count=0,last={code:"",t:0},busy=false,hideT=null,jsQRloaded=false;
+const CODE_RE=/ML-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}/;
+
+function show(id){["s-login","s-setup","s-scan"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id))}
+async function api(path,opts){
+  const r=await fetch(path,opts);const j=await r.json().catch(()=>({}));
+  if(!r.ok){const e=new Error(j.error||"Erreur "+r.status);e.status=r.status;throw e}return j;
+}
+async function toSetup(){
+  try{
+    const evs=await api("/api/events");
+    $("#ev").innerHTML=evs.map(e=>`<option value="${e.id}">${esc(e.titre)} — ${new Date(e.date).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</option>`).join("");
+    if(!evs.length){$("#e-setup").textContent="Aucun événement à venir.";}
+    show("s-setup");
+  }catch(e){$("#e-login").textContent=e.message}
+}
+$("#b-login").onclick=async()=>{
+  KEY=$("#key").value.trim();if(!KEY)return;
+  $("#e-login").textContent="";
+  try{ // test de la clé : un code bidon est « invalide » (200) si la clé est bonne, 401 sinon
+    await api("/api/admin/validate",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":KEY},body:JSON.stringify({code:"ML-TEST-TEST-TEST",consume:false})});
+    try{sessionStorage.setItem("ck",KEY)}catch(e){}
+    if(!(ET.staff.get()&&ET.staff.get().role==="admin"))ET.staff.set("control",KEY);
+    if(ET.staff.get()&&ET.staff.get().role==="control"&&!document.querySelector("#staff-btn:not(.staff-only)")){location.reload();return}   // le menu ne montre alors que les options de contrôle
+    toSetup();
+  }catch(e){$("#e-login").textContent=e.status===401?"Clé incorrecte.":e.message}
+};
+if(KEY){$("#key").value=KEY;toSetup()}
+// ---- Test du poste : connexion, caméra, lecteur QR ----
+function dgRow(cls,title,detail){return `<div class="dg d-${cls}"><b>${cls==="ok"?"✔":cls==="ko"?"✖":"⚠"}</b><div>${esc(title)}<small>${esc(detail||"")}</small></div></div>`}
+$("#b-diag").onclick=async()=>{
+  const out=$("#diag"),rows=[];const draw=()=>{out.innerHTML=rows.join("")};
+  $("#b-diag").disabled=true;rows.push(dgRow("warn","Test en cours…","Ne bougez pas, environ 10 secondes."));draw();
+  const R=[];
+  // 1. connexion sécurisée
+  const secure=location.protocol==="https:"||["localhost","127.0.0.1"].includes(location.hostname);
+  R.push(secure?dgRow("ok","Connexion sécurisée (HTTPS)"):dgRow("ko","Connexion non sécurisée","La caméra est refusée hors HTTPS. Ouvrez l'adresse https:// du site."));
+  // 2. réseau + clé : 5 contrôles à blanc (rien n'est consommé)
+  const times=[];let fails=0,keyBad=false;
+  for(let i=0;i<5;i++){const t=performance.now();try{await api("/api/admin/validate",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":KEY},body:JSON.stringify({code:"ML-TEST-TEST-TEST",consume:false})});times.push(performance.now()-t)}catch(e){fails++;if(e.status===401)keyBad=true}}
+  times.sort((a,b)=>a-b);const med=times.length?Math.round(times[Math.floor(times.length/2)]):null,max=times.length?Math.round(times[times.length-1]):null;
+  if(keyBad)R.push(dgRow("ko","Clé de contrôle refusée","Reconnectez-vous avec la bonne clé."));
+  else if(fails>=3||med===null)R.push(dgRow("ko","Réseau inutilisable",`${fails} requêtes sur 5 ont échoué. Changez d'opérateur ou de point d'accès.`));
+  else if(med>2500||fails>0)R.push(dgRow("warn","Réseau lent ou instable",`Médiane ${med} ms, maximum ${max} ms, ${fails} échec(s) sur 5. Le contrôle sera lent : prévoyez un second réseau.`));
+  else if(med>800)R.push(dgRow("warn","Réseau lent",`Médiane ${med} ms, maximum ${max} ms. Utilisable, chaque billet prendra environ ${(med/1000).toFixed(1)} s.`));
+  else R.push(dgRow("ok","Réseau correct",`Médiane ${med} ms, maximum ${max} ms sur 5 contrôles à blanc.`));
+  // 3. caméra
+  let camOk=false;
+  try{const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});const tr=st.getVideoTracks()[0];const set=tr.getSettings?tr.getSettings():{};st.getTracks().forEach(t=>t.stop());camOk=true;R.push(dgRow("ok","Caméra disponible",set.width?`Image ${set.width}×${set.height}.`:""))}
+  catch(e){R.push(dgRow("ko","Caméra indisponible ("+(e.name||"erreur")+")","Autorisez la caméra pour ce site dans les réglages du navigateur. Sinon, utilisez la saisie manuelle."))}
+  // 4. lecteur QR
+  let reader="";
+  try{if("BarcodeDetector" in window){const f=await BarcodeDetector.getSupportedFormats();if(f.includes("qr_code"))reader="Lecteur intégré du navigateur"}}catch(e){}
+  if(!reader){await loadJsQR();if(window.jsQR)reader="Lecteur jsQR du site"}
+  R.push(reader?dgRow(camOk?"ok":"warn","Lecteur de QR code : "+reader):dgRow("warn","Pas de lecteur de QR code dans ce navigateur","Utilisez Chrome sur Android, ou la saisie manuelle du code.")); 
+  // 5. écran
+  R.push(dgRow(screen.width>=320?"ok":"warn","Écran "+screen.width+"×"+screen.height,"Gardez l'écran allumé et la luminosité au maximum au soleil."));
+  const bad=R.some(r=>r.includes('class="dg d-ko"')),warn=R.some(r=>r.includes('class="dg d-warn"'));
+  rows.length=0;rows.push(dgRow(bad?"ko":warn?"warn":"ok",bad?"Ce poste n'est pas prêt":warn?"Ce poste fonctionne avec réserves":"Ce poste est prêt",""),...R);draw();
+  $("#b-diag").disabled=false;
+};
+$("#m-consume").onclick=()=>setMode("consume");$("#m-check").onclick=()=>setMode("check");
+function setMode(m){MODE=m;$("#m-consume").classList.toggle("on",m==="consume");$("#m-check").classList.toggle("on",m==="check");
+  $("#m-help").textContent=m==="consume"?"Chaque billet accepté est marqué « utilisé » : un second passage sera refusé.":"Le billet est seulement vérifié, il reste utilisable (pour test ou formation)."}
+
+$("#b-start").onclick=async()=>{
+  EV=+$("#ev").value;if(!EV){$("#e-setup").textContent="Choisissez un événement.";return}
+  EVNAME=$("#ev").selectedOptions[0].textContent;count=0;$("#cnt").textContent=0;$("#evname").textContent=EVNAME+(MODE==="check"?" (vérification)":"");
+  show("s-scan");startCam();
+};
+$("#b-stop").onclick=()=>{stopCam();show("s-setup")};
+
+// ---- caméra ----
+async function startCam(){
+  $("#e-cam").textContent="";
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+    const v=$("#video");v.srcObject=stream;await v.play();
+    if("BarcodeDetector" in window){try{detector=new BarcodeDetector({formats:["qr_code"]})}catch(e){detector=null}}
+    if(!detector)await loadJsQR();
+    if(!detector&&!window.jsQR){$("#e-cam").textContent="Ce navigateur ne sait pas lire les QR codes avec la caméra. Utilisez Chrome sur Android, ou la saisie manuelle ci-dessous.";}
+    scanning=true;requestAnimationFrame(loop);
+  }catch(e){$("#e-cam").textContent="Caméra indisponible ("+(e.name||"erreur")+"). Autorisez la caméra (le site doit être en HTTPS) ou utilisez la saisie manuelle."}
+}
+function stopCam(){scanning=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function loadJsQR(){return new Promise(res=>{if(jsQRloaded||window.jsQR)return res();const s=document.createElement("script");s.src="vendor/jsQR.js";s.onload=()=>{jsQRloaded=true;res()};s.onerror=()=>res();document.head.appendChild(s)})}
+const cv=document.createElement("canvas"),cx=cv.getContext("2d",{willReadFrequently:true});
+async function loop(){
+  if(!scanning)return;
+  const v=$("#video");
+  if(!busy&&v.readyState>=2){
+    try{
+      let text=null;
+      if(detector){const r=await detector.detect(v);if(r.length)text=r[0].rawValue}
+      else if(window.jsQR){const w=v.videoWidth,h=v.videoHeight;if(w){const s=Math.min(1,640/w);cv.width=w*s;cv.height=h*s;cx.drawImage(v,0,0,cv.width,cv.height);const d=cx.getImageData(0,0,cv.width,cv.height);const q=jsQR(d.data,d.width,d.height);if(q)text=q.data}}
+      if(text)handle(text);
+    }catch(e){}
+  }
+  setTimeout(()=>requestAnimationFrame(loop),detector?120:200);
+}
+$("#b-manual").onclick=()=>{const t=$("#manual").value;if(t.trim())handle(t,true);$("#manual").value=""};
+$("#manual").addEventListener("keydown",e=>{if(e.key==="Enter")$("#b-manual").click()});
+
+// ---- contrôle ----
+async function handle(text,force){
+  const m=String(text).toUpperCase().match(CODE_RE);
+  const code=m?m[0]:null;
+  const t=Date.now();
+  if(!code){if(force||t-last.t>2500){last={code:text,t};result("ko","CODE NON RECONNU","Ce QR code n'est pas un billet E-Ticket.")}return}
+  if(!force&&code===last.code&&t-last.t<4000)return;
+  last={code,t};busy=true;
+  try{
+    const r=await api("/api/admin/validate",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":KEY},body:JSON.stringify({code,eventId:EV,consume:MODE==="consume"})});
+    if(r.result==="valid"){if(MODE==="consume"){count++;$("#cnt").textContent=count}result("ok","✔ VALIDE",MODE==="consume"?"Entrée enregistrée":"Billet valide (non consommé)")}
+    else if(r.result==="already_used")result("ko","DÉJÀ UTILISÉ","Utilisé à "+new Date(r.usedAt).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}));
+    else if(r.result==="wrong_event")result("warn","AUTRE ÉVÉNEMENT","Ce billet n'est pas valable pour cet événement.");
+    else result("ko","BILLET INVALIDE","Code inconnu.");
+  }catch(e){
+    if(e.status===401){try{sessionStorage.removeItem("ck")}catch(_){}stopCam();show("s-login");$("#e-login").textContent="Clé refusée. Saisissez-la à nouveau."}
+    else result("warn","ERREUR RÉSEAU",e.message+" — réessayez le scan.");
+  }finally{busy=false}
+}
+function beep(f,d){try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=f;g.gain.value=.15;o.connect(g);g.connect(a.destination);o.start();setTimeout(()=>{o.stop();a.close()},d)}catch(e){}}
+function result(cls,big,det){
+  const r=$("#res");r.className="show "+cls;$("#r-big").textContent=big;$("#r-det").textContent=det;
+  try{navigator.vibrate&&navigator.vibrate(cls==="ok"?80:[120,60,120])}catch(e){}
+  beep(cls==="ok"?880:300,cls==="ok"?150:350);
+  clearTimeout(hideT);hideT=setTimeout(hideRes,cls==="ok"?1500:3500);
+}
+function hideRes(){clearTimeout(hideT);$("#res").className=""}
+// Synchronisation en temps réel : la liste des événements suit les changements faits par l'administration.
+ET.live(async m=>{
+  if(!KEY||$("#s-setup").classList.contains("hidden"))return;
+  if(m.type==="hello"||m.type==="events"||(m.type==="sync"&&m.what==="events")){
+    try{const evs=await api("/api/events"),old=$("#ev").value;
+      $("#ev").innerHTML=evs.map(e=>`<option value="${e.id}">${esc(e.titre)} — ${new Date(e.date).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</option>`).join("");
+      if(old)$("#ev").value=old}catch(e){}
+  }
+},{staff:true});
+</script>
+</body>
+</html>

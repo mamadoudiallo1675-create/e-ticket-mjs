@@ -1,0 +1,45 @@
+Organisation des bases de données — 2026-11-09T20:11:59.100Z
+OK    1. UTILISATEURS (relationnelle) : orders, tickets, otp, sessions, support
+OK    1. ADMIN (relationnelle) : events, tribunes, admin_log
+OK    1. PERSONNEL (relationnelle) : staff, staff_log
+OK    1. aucune table d'un autre domaine dans la base utilisateurs
+OK    1. fichiers : 3 bases SQLite + dossiers contrôle et journal (documents)
+OK    1. inventaire des bases servi à l'administration — Utilisateurs = Relationnelle undefined | Admin = Relationnelle undefined | Admin (journal d'activité) = Non relationnelle | Personnel = Relationnelle undefined | Contrôle = Non relationnelle
+OK    1. inventaire réservé à l'administration
+OK    2. panne au milieu d'une commande : stock (admin) ET commande (utilisateurs) annulés ensemble
+OK    3. billet émis dans la base utilisateurs (relationnelle)
+OK    3. stock décrémenté dans la base admin
+OK    3. entrée inscrite dans la base de contrôle (documents) : 1re valide, 2e (autre borne) refusée
+OK    3. document « entrées » : clé = code du billet, avec poste de contrôle — {"event":3,"at":1794255116260,"staff":2,"poste":"Porte A"}
+OK    3. journal des passages : 2 documents (accepté + refusé) avec le poste — already_used@Porte B, valid@Porte A
+OK    3. le billet n'est PAS modifié dans la base utilisateurs (usage = fait de contrôle)
+OK    3. le client voit « utilisé » (lecture croisée)
+OK    3. statistiques admin : entrées comptées depuis la base de contrôle
+OK    3. contrôle : fausse clé / clé révoquée refusées
+OK    4. documents d'entrée non modifiables ni supprimables
+OK    4. putIfAbsent atomique
+OK    4. écrit à plat, en ajout seul (NDJSON lisible)
+OK    4. après coupure : ligne tronquée ignorée, données intactes — {"n":1,"bad":1,"has":true}
+OK    5. comptes créés depuis la configuration (noms conservés) — Direction:admin, Porte A:control, Porte B:control
+OK    5. aucune clé en clair dans AUCUN fichier de base (empreintes seulement) — 6 fichiers examinés
+OK    5. la clé de contrôle ne donne pas l'administration
+OK    5. création d'un compte : clé forte renvoyée une seule fois — MJS-CTL-LVAL…
+OK    5. la nouvelle clé fonctionne à l'entrée
+OK    5. la clé n'est plus lisible ensuite
+OK    5. révocation immédiate
+OK    5. impossible de se révoquer soi-même / de supprimer le dernier administrateur
+OK    5. journal des connexions du personnel en lecture seule (base)
+OK    5. connexions réussies et refusées tracées
+OK    5. clé retirée de la configuration = compte révoqué au démarrage
+OK    6. journal d'activité servi depuis la base de documents
+OK    6. fichier journal en ajout seul
+OK    6. journal non modifiable
+OK    7. sauvegarde : 3 bases SQLite + 2 dossiers de documents
+OK    7. la sauvegarde de la base admin est lisible — 5
+OK    8. ancienne base unique préparée (1 commande payée, 1 billet utilisé)
+OK    8. migration : événements → admin, commande/billets → utilisateurs, billet utilisé → contrôle, activité → journal — [bases] ancienne base unique migrée : utilisateurs / admin / personnel (SQLite) + contrôle / journal (documents)
+{"ev":5,"ord":"PAID","tk":2,"used":true,"other":false,"act":4,"adm":1,"mainEv":false,"ticks":["USED","VALID"]}
+OK    8. statuts des billets conservés après migration
+OK    8. réouverture sans nouvelle migration
+OK    9. node server.js (demarrer.bat) : les clés de cles-acces.json sont acceptées — [{"role":"admin","nom":"Administration"},{"role":"control","nom":"Porte test"}]
+OK    9. clé collée avec espaces / retour à la ligne acceptée ; clés par défaut et fausses refusées
